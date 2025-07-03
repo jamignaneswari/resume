@@ -3,19 +3,14 @@ import streamlit as st
 from fpdf import FPDF
 from pathlib import Path
 
-
-logo_path = Path(__file__).parent / "logo.png"
-
-
-# Page config with favicon
+# Page config
 st.set_page_config(
     page_title="Resume Builder + Job Recommender",
-    page_icon="https://raw.githubusercontent.com/jamiganeswari/resume/main/logo.png",
+    page_icon="https://www.codester.com/static/uploads/items/000/041/41164/icon.png",
     layout="centered"
 )
 
-
-# Background styling with logo
+# Background styling
 page_bg_img = """
 <style>
 [data-testid="stAppViewContainer"] {
@@ -50,7 +45,7 @@ page_bg_img = """
 """
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
-# Logo + Header
+# Header & Logo
 st.markdown("""
 <div style="text-align:center;">
     <img src="https://www.codester.com/static/uploads/items/000/041/41164/icon.png" width="100">
@@ -61,7 +56,7 @@ st.markdown('<div class="resume-box">' "<h2 style='text-align: center; color: #0
 st.title("🧑‍💼 Resume Builder & Job Recommender")
 st.markdown("✨ Fill your details below to generate resume & get job suggestions.")
 
-# Resume input form
+# Resume form
 with st.form("resume_form"):
     name = st.text_input("Full Name")
     email = st.text_input("Email Address")
@@ -72,7 +67,7 @@ with st.form("resume_form"):
     education = st.text_area("Education")
     submit = st.form_submit_button("📄 Generate Resume & Suggest Jobs")
 
-# Job skill mapping
+# Job mapping
 job_data = {
     'Python, ML, Data Science, Analytics, NumPy, Pandas, Scikit-learn': '👨‍💻 Data Scientist at AI Corp',
     'HTML, CSS, JavaScript, Frontend Developer, UI Design, Bootstrap': '🌐 Frontend Developer at WebWorks',
@@ -99,8 +94,7 @@ def match_job(skills_text):
             return job_data[key]
     return "❗ No exact match found. Try refining your skill keywords."
 
-
-# PDF generation
+# PDF generator
 def create_pdf(name, email, phone, linkedin, skills, experience, education):
     pdf = FPDF()
     pdf.add_page()
@@ -126,34 +120,42 @@ def create_pdf(name, email, phone, linkedin, skills, experience, education):
     pdf.output(file_path)
     return file_path
 
-# Output section
+# Submit action
 if submit:
-    save_resume_to_db(name, email, phone, linkedin, skills, experience, education)
+    if not all([name, email, phone, linkedin, skills, experience, education]):
+        st.error("❌ Please fill out all the fields before submitting.")
+    else:
+        try:
+            save_resume_to_db(name, email, phone, linkedin, skills, experience, education)
 
-    if st.checkbox("📋 Show All Submitted Resumes"):
-        resumes = get_all_resumes()
-        st.write(resumes)
+            if st.checkbox("📋 Show All Submitted Resumes"):
+                resumes = get_all_resumes()
+                st.write(resumes)
 
-    st.markdown("----")
-    st.subheader("🎯 Job Match Based on Your Skills:")
-    matched = match_job(skills)
-    st.markdown(f"<div class='job-highlight'>{matched}</div>", unsafe_allow_html=True)
+            st.markdown("----")
+            st.subheader("🎯 Job Match Based on Your Skills:")
+            matched = match_job(skills)
+            st.markdown(f"<div class='job-highlight'>{matched}</div>", unsafe_allow_html=True)
 
-    st.subheader("📄 Resume Preview:")
-    st.markdown(f"**Name:** {name}")
-    st.markdown(f"**Email:** {email}")
-    st.markdown(f"**Phone:** {phone}")
-    st.markdown(f"**LinkedIn:** {linkedin}")
-    st.markdown(f"**Skills:** {skills}")
-    st.markdown(f"**Experience:** {experience}")
-    st.markdown(f"**Education:** {education}")
+            st.subheader("📄 Resume Preview:")
+            st.markdown(f"**Name:** {name}")
+            st.markdown(f"**Email:** {email}")
+            st.markdown(f"**Phone:** {phone}")
+            st.markdown(f"**LinkedIn:** {linkedin}")
+            st.markdown(f"**Skills:** {skills}")
+            st.markdown(f"**Experience:** {experience}")
+            st.markdown(f"**Education:** {education}")
 
-    pdf_path = create_pdf(name, email, phone, linkedin, skills, experience, education)
-    with open(pdf_path, "rb") as f:
-        st.download_button("📥 Download Your Resume (PDF)", f, file_name="my_resume.pdf", mime="application/pdf")
+            pdf_path = create_pdf(name, email, phone, linkedin, skills, experience, education)
+            with open(pdf_path, "rb") as f:
+                st.download_button("📥 Download Your Resume (PDF)", f, file_name="my_resume.pdf", mime="application/pdf")
 
-    st.markdown("----")
+            st.markdown("----")
 
+        except Exception as e:
+            st.error(f"⚠️ Failed to save resume. Error: {e}")
+
+# Show resumes section
 if st.checkbox("📋 Show All Submitted Resumes", key="show_all_resumes"):
     resumes = get_all_resumes()
     if resumes:
