@@ -140,11 +140,31 @@ if submit:
     st.markdown(f"**Experience:** {experience}")
     st.markdown(f"**Education:** {education}")
 
-    pdf_path = create_pdf(name, email, phone, linkedin, skills, experience, education)
-    with open(pdf_path, "rb") as f:
-        st.download_button("📥 Download Your Resume (PDF)", f, file_name="my_resume.pdf", mime="application/pdf")
+    def create_pdf(name, email, phone, linkedin, skills, experience, education):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt=name, ln=1, align='C')
+    pdf.set_font("Arial", '', 12)
+    pdf.cell(200, 10, txt=f"Email: {email} | Phone: {phone}", ln=1, align='C')
+    pdf.cell(200, 10, txt=f"LinkedIn: {linkedin}", ln=1, align='C')
+    pdf.ln(10)
 
-    st.markdown("----")
+    def section(title, content):
+        pdf.set_font("Arial", 'B', 14)
+        pdf.cell(200, 10, title, ln=1)
+        pdf.set_font("Arial", '', 12)
+        pdf.multi_cell(0, 10, content)
+        pdf.ln()
+
+    section("Skills", skills)
+    section("Experience", experience)
+    section("Education", education)
+
+    file_path = "resume.pdf"
+    pdf.output(file_path)
+    return file_path
+
 
 # 🛡 ADMIN-ONLY: View All Resumes
 with st.expander("🔐 Admin Login to View All Submitted Resumes"):
