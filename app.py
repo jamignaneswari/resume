@@ -10,9 +10,10 @@ logo_path = Path(__file__).parent / "logo.png"
 # Page config with favicon
 st.set_page_config(
     page_title="Resume Builder + Job Recommender",
-    page_icon="https://www.codester.com/static/uploads/items/000/041/41164/icon.png",
+    page_icon="https://raw.githubusercontent.com/jamiganeswari/resume/main/logo.png",
     layout="centered"
 )
+
 
 # Background styling with logo
 page_bg_img = """
