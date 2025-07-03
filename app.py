@@ -1,13 +1,15 @@
-from backend.operations import save_resume_to_db
+from backend.operations import save_resume_to_db, get_all_resumes
 import streamlit as st
 from fpdf import FPDF
-from backend.operations import get_all_resumes
 
+# Page config with favicon
+st.set_page_config(
+    page_title="Resume Builder + Job Recommender",
+    page_icon="https://www.codester.com/static/uploads/items/000/041/41164/icon.png",
+    layout="centered"
+)
 
-# Page config
-st.set_page_config(page_title="Resume Builder + Job Recommender", layout="centered")
-
-# Background styling
+# Background styling with logo
 page_bg_img = """
 <style>
 [data-testid="stAppViewContainer"] {
@@ -42,7 +44,13 @@ page_bg_img = """
 """
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
-# Main container
+# Logo + Header
+st.markdown("""
+<div style="text-align:center;">
+    <img src="https://www.codester.com/static/uploads/items/000/041/41164/icon.png" width="100">
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown('<div class="resume-box">' "<h2 style='text-align: center; color: #000;'>📄 RESUME BUILDER & JOB MATCHER </h2>", unsafe_allow_html=True)
 st.title("🧑‍💼 Resume Builder & Job Recommender")
 st.markdown("✨ Fill your details below to generate resume & get job suggestions.")
@@ -77,8 +85,6 @@ job_data = {
     'Public Speaking, Presentation, Customer Service, Negotiation': '📣 Sales Executive at MarketMinds'
 }
 
-
-
 def match_job(skills_text):
     user_skills = [skill.strip().lower() for skill in skills_text.split(',')]
     for key in job_data:
@@ -110,7 +116,7 @@ def create_pdf(name, email, phone, linkedin, skills, experience, education):
     section("Experience", experience)
     section("Education", education)
 
-    file_path = "resume.pdf"  # ✅ Local save path for PyCharm
+    file_path = "resume.pdf"
     pdf.output(file_path)
     return file_path
 
@@ -119,15 +125,12 @@ if submit:
     save_resume_to_db(name, email, phone, linkedin, skills, experience, education)
 
     if st.checkbox("📋 Show All Submitted Resumes"):
-        from backend.operations import get_all_resumes  # make sure to import this
         resumes = get_all_resumes()
         st.write(resumes)
 
     st.markdown("----")
     st.subheader("🎯 Job Match Based on Your Skills:")
     matched = match_job(skills)
-
-    # 🎨 Stylish display of job match
     st.markdown(f"<div class='job-highlight'>{matched}</div>", unsafe_allow_html=True)
 
     st.subheader("📄 Resume Preview:")
@@ -139,12 +142,12 @@ if submit:
     st.markdown(f"**Experience:** {experience}")
     st.markdown(f"**Education:** {education}")
 
-    # Generate and download PDF
     pdf_path = create_pdf(name, email, phone, linkedin, skills, experience, education)
     with open(pdf_path, "rb") as f:
         st.download_button("📥 Download Your Resume (PDF)", f, file_name="my_resume.pdf", mime="application/pdf")
 
-        st.markdown("----")
+    st.markdown("----")
+
 if st.checkbox("📋 Show All Submitted Resumes", key="show_all_resumes"):
     resumes = get_all_resumes()
     if resumes:
@@ -159,6 +162,5 @@ if st.checkbox("📋 Show All Submitted Resumes", key="show_all_resumes"):
             st.markdown("---")
     else:
         st.warning("No resumes found in the database yet.")
-
 
 st.markdown("</div>", unsafe_allow_html=True)
