@@ -1,6 +1,11 @@
 from backend.operations import save_resume_to_db, get_all_resumes
 import streamlit as st
 from fpdf import FPDF
+from pathlib import Path
+
+
+logo_path = Path(__file__).parent / "logo.png"
+
 
 # Page config with favicon
 st.set_page_config(
