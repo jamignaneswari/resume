@@ -141,14 +141,14 @@ if submit:
     st.markdown(f"**Education:** {education}")
 
     def create_pdf(name, email, phone, linkedin, skills, experience, education):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", 'B', 16)
-    pdf.cell(200, 10, txt=name, ln=1, align='C')
-    pdf.set_font("Arial", '', 12)
-    pdf.cell(200, 10, txt=f"Email: {email} | Phone: {phone}", ln=1, align='C')
-    pdf.cell(200, 10, txt=f"LinkedIn: {linkedin}", ln=1, align='C')
-    pdf.ln(10)
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", 'B', 16)
+        pdf.cell(200, 10, txt=name, ln=1, align='C')
+        pdf.set_font("Arial", '', 12)
+        pdf.cell(200, 10, txt=f"Email: {email} | Phone: {phone}", ln=1, align='C')
+        pdf.cell(200, 10, txt=f"LinkedIn: {linkedin}", ln=1, align='C')
+        pdf.ln(10)
 
     def section(title, content):
         pdf.set_font("Arial", 'B', 14)
