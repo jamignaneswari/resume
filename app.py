@@ -140,7 +140,7 @@ if submit:
     st.markdown(f"**Experience:** {experience}")
     st.markdown(f"**Education:** {education}")
 
-   pdf_path = create_pdf(name, email, phone, linkedin, skills, experience, education)
+    pdf_path = create_pdf(name, email, phone, linkedin, skills, experience, education)
     with open(pdf_path, "rb") as f:
         st.download_button("📥 Download Your Resume (PDF)", f, file_name="my_resume.pdf", mime="application/pdf")
 
