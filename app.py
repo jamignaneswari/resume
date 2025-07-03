@@ -2,6 +2,7 @@ from backend.operations import save_resume_to_db, get_all_resumes
 import streamlit as st
 from fpdf import FPDF
 from pathlib import Path
+import os
 
 # Page config
 st.set_page_config(
@@ -45,7 +46,7 @@ page_bg_img = """
 """
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
-# Header & Logo
+# Logo & Title
 st.markdown("""
 <div style="text-align:center;">
     <img src="https://www.codester.com/static/uploads/items/000/041/41164/icon.png" width="100">
@@ -56,7 +57,7 @@ st.markdown('<div class="resume-box">' "<h2 style='text-align: center; color: #0
 st.title("🧑‍💼 Resume Builder & Job Recommender")
 st.markdown("✨ Fill your details below to generate resume & get job suggestions.")
 
-# Resume form
+# Resume input form
 with st.form("resume_form"):
     name = st.text_input("Full Name")
     email = st.text_input("Email Address")
@@ -67,7 +68,7 @@ with st.form("resume_form"):
     education = st.text_area("Education")
     submit = st.form_submit_button("📄 Generate Resume & Suggest Jobs")
 
-# Job mapping
+# Job Matching
 job_data = {
     'Python, ML, Data Science, Analytics, NumPy, Pandas, Scikit-learn': '👨‍💻 Data Scientist at AI Corp',
     'HTML, CSS, JavaScript, Frontend Developer, UI Design, Bootstrap': '🌐 Frontend Developer at WebWorks',
@@ -94,7 +95,8 @@ def match_job(skills_text):
             return job_data[key]
     return "❗ No exact match found. Try refining your skill keywords."
 
-# PDF generator
+
+# PDF Generation
 def create_pdf(name, email, phone, linkedin, skills, experience, education):
     pdf = FPDF()
     pdf.add_page()
@@ -120,55 +122,58 @@ def create_pdf(name, email, phone, linkedin, skills, experience, education):
     pdf.output(file_path)
     return file_path
 
-# Submit action
+# On form submit
 if submit:
-    if not all([name, email, phone, linkedin, skills, experience, education]):
-        st.error("❌ Please fill out all the fields before submitting.")
-    else:
-        try:
-            save_resume_to_db(name, email, phone, linkedin, skills, experience, education)
+    save_resume_to_db(name, email, phone, linkedin, skills, experience, education)
 
-            if st.checkbox("📋 Show All Submitted Resumes"):
-                resumes = get_all_resumes()
-                st.write(resumes)
+    st.markdown("----")
+    st.subheader("🎯 Job Match Based on Your Skills:")
+    matched = match_job(skills)
+    st.markdown(f"<div class='job-highlight'>{matched}</div>", unsafe_allow_html=True)
 
-            st.markdown("----")
-            st.subheader("🎯 Job Match Based on Your Skills:")
-            matched = match_job(skills)
-            st.markdown(f"<div class='job-highlight'>{matched}</div>", unsafe_allow_html=True)
+    st.subheader("📄 Resume Preview:")
+    st.markdown(f"**Name:** {name}")
+    st.markdown(f"**Email:** {email}")
+    st.markdown(f"**Phone:** {phone}")
+    st.markdown(f"**LinkedIn:** {linkedin}")
+    st.markdown(f"**Skills:** {skills}")
+    st.markdown(f"**Experience:** {experience}")
+    st.markdown(f"**Education:** {education}")
 
-            st.subheader("📄 Resume Preview:")
-            st.markdown(f"**Name:** {name}")
-            st.markdown(f"**Email:** {email}")
-            st.markdown(f"**Phone:** {phone}")
-            st.markdown(f"**LinkedIn:** {linkedin}")
-            st.markdown(f"**Skills:** {skills}")
-            st.markdown(f"**Experience:** {experience}")
-            st.markdown(f"**Education:** {education}")
+    pdf_path = create_pdf(name, email, phone, linkedin, skills, experience, education)
+    with open(pdf_path, "rb") as f:
+        st.download_button("📥 Download Your Resume (PDF)", f, file_name="my_resume.pdf", mime="application/pdf")
 
-            pdf_path = create_pdf(name, email, phone, linkedin, skills, experience, education)
-            with open(pdf_path, "rb") as f:
-                st.download_button("📥 Download Your Resume (PDF)", f, file_name="my_resume.pdf", mime="application/pdf")
+    st.markdown("----")
 
-            st.markdown("----")
 
-        except Exception as e:
-            st.error(f"⚠️ Failed to save resume. Error: {e}")
+# 🛡 ADMIN-ONLY: View All Resumes
+with st.expander("🔐 Admin Login to View All Submitted Resumes"):
+    admin_user = st.text_input("Admin Username")
+    admin_pass = st.text_input("Admin Password", type="password")
+    if st.button("Login"):
+        if admin_user == "admin" and admin_pass == "yourpassword":  # <-- Change this!
+            resumes = get_all_resumes()
+            if resumes:
+                st.success("✅ Logged in as Admin")
+                for r in resumes:
+                    st.markdown(f"**👤 Name:** {r.name}")
+                    st.markdown(f"**📧 Email:** {r.email}")
+                    st.markdown(f"**📞 Phone:** {r.phone}")
+                    st.markdown(f"**🔗 LinkedIn:** {r.linkedin}")
+                    st.markdown(f"**🛠 Skills:** {r.skills}")
+                    st.markdown(f"**💼 Experience:** {r.experience}")
+                    st.markdown(f"**🎓 Education:** {r.education}")
+                    st.markdown("---")
+            else:
+                st.warning("No resumes found.")
+        else:
+            st.error("🚫 Invalid admin credentials")
 
-# Show resumes section
-if st.checkbox("📋 Show All Submitted Resumes", key="show_all_resumes"):
-    resumes = get_all_resumes()
-    if resumes:
-        for r in resumes:
-            st.markdown(f"**👤 Name:** {r.name}")
-            st.markdown(f"**📧 Email:** {r.email}")
-            st.markdown(f"**📞 Phone:** {r.phone}")
-            st.markdown(f"**🔗 LinkedIn:** {r.linkedin}")
-            st.markdown(f"**🛠 Skills:** {r.skills}")
-            st.markdown(f"**💼 Experience:** {r.experience}")
-            st.markdown(f"**🎓 Education:** {r.education}")
-            st.markdown("---")
-    else:
-        st.warning("No resumes found in the database yet.")
+# Optional: Open DB location
+if st.button("📁 Open DB Folder"):
+    folder_path = Path("backend/data").resolve()
+    os.startfile(folder_path)
 
 st.markdown("</div>", unsafe_allow_html=True)
+
