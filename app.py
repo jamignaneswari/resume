@@ -144,6 +144,7 @@ if submit:
     with open(pdf_path, "rb") as f:
         st.download_button("📥 Download Your Resume (PDF)", f, file_name="my_resume.pdf", mime="application/pdf")
 
+            st.markdown("----")
 
 # 🛡 ADMIN-ONLY: View All Resumes
 with st.expander("🔐 Admin Login to View All Submitted Resumes"):
