@@ -170,10 +170,7 @@ with st.expander("🔐 Admin Login to View All Submitted Resumes"):
         else:
             st.error("🚫 Invalid admin credentials")
 
-# Optional: Open DB location
-if st.button("📁 Open DB Folder"):
-    folder_path = Path("backend/data").resolve()
-    os.startfile(folder_path)
+
 
 st.markdown("</div>", unsafe_allow_html=True)
 
